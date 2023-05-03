@@ -1,0 +1,9 @@
+- Installation de ansible sur une VM CentOS
+- Mise en place d'une infra en déployant VM montées par vagrant
+- Création de notre premier inventaire
+- Création de nottre premier playbook ansible
+---------------------------------------------------------------
+- Installation of ansible on a CentOS VM
+- Setting up an infra by deploying VMs mounted by vagrant
+- Creation of our first inventory
+- Creation of our first ansible playbook
