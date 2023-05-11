@@ -1,0 +1,98 @@
+---
+- name: "Apache installation using docker"
+  hosts: prod
+  become: yes
+  vars:
+    docker_host: "unix://var/run/docker.sock"
+
+  pre_tasks:
+  # Installation du dépôt EPEL pour CentOS
+    - name: Install EPEL repo
+      when: ansible_distribution == "CentOS"
+      package:
+        name: epel-release
+        state: present
+
+    # Téléchargement du script d'installation de pip pour Python 2.7
+    - name: download pip script
+      get_url:
+        url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+        dest: /tmp/get-pip.py
+
+    # Installation de pip pour Python 2.7
+    - name: install python-pip
+      command: python2.7 /tmp/get-pip.py
+
+    # Création d'un lien symbolique pour pip
+    - name: Create symlink for pip
+      command: ln -s /usr/local/bin/pip /usr/bin/pip
+      args:
+        creates: /usr/bin/pip
+
+    # Installation du module Python Docker
+    - name: Install docker python
+      pip:
+        name: docker-py
+
+    # Installation des dépendances de Docker
+    - name: Install Docker dependencies
+      ansible.builtin.yum:
+        name:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+        state: present
+
+    # Ajout du dépôt Docker
+    - name: Add Docker repo
+      ansible.builtin.yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg
+
+    # Installation de Docker
+    - name: Install Docker
+      ansible.builtin.yum:
+        name: docker-ce
+        state: present
+
+    # Démarrage et activation du service Docker
+    - name: Start Docker service
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+  tasks:
+    # Création d'un conteneur Apache
+    - name: "Create Apache container"
+      docker_container:
+        name: webapp
+        image: httpd
+        ports:
+          - "80:80"
+ vagrant@ansible  ~/eazy-ansible/TP-5/webapp   main ±  cat deployold.yml 
+---
+- name: "Apache installation using docker"
+  hosts: prod
+  vars:
+    docker_host: "unix://var/run/docker.sock"
+
+  pre_tasks:
+    - name: Install EPEL repo
+      package: name=epel-release state=present
+      when: ansible_distribution == "CentOS"
+    - name: install python-pip
+      yum: name=python-pip state=present update_cache=yes
+    - name: Install docker python
+      pip: name=docker-py
+
+  tasks:
+    - name: Create Apache container
+      docker_container:
+        name: webapp
+        image: httpd
+        ports:
+          - "8080:80"
