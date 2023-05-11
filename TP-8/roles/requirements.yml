@@ -1,0 +1,4 @@
+# Installer le role pour wordpress récupéré depuis github
+- src: https://github.com/diranetafen/ansible-role-containerized-wordpress.git
+
+# TO DO Récupérer un role depuis Ansible Galaxy
